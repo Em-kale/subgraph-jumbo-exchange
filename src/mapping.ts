@@ -1,5 +1,5 @@
 import { near, log, BigInt, json, JSONValueKind } from "@graphprotocol/graph-ts"
-import { Log } from "../generated/schema" // ensure to add any entities you define in schema.graphql
+import { DepositAndStake, LiquidUnstake, Unstake } from "../generated/schema" // ensure to add any entities you define in schema.graphql
 
 export function handleReceipt(receipt: near.ReceiptWithOutcome): void {
   const actions = receipt.receipt.actions;
@@ -31,11 +31,11 @@ function handleAction(
   const functionCall = action.toFunctionCall();
 
   // change the methodName here to the methodName emitting the log in the contract
-  if (functionCall.methodName == "putDID") {
+  if (functionCall.methodName == "deposit_and_stake") {
     const receiptId = receipt.id.toBase58()
 
       // Maps the JSON formatted log to the LOG entity
-      let logs = new Log(`${receiptId}`)
+      let logs = new DepositAndStake(`${receiptId}`)
 
       // Standard receipt properties - likely do not need to change
       logs.blockTime = BigInt.fromU64(blockHeader.timestampNanosec/1000000)
@@ -52,59 +52,124 @@ function handleAction(
       logs.outcomeBlockHash = outcome.blockHash.toBase58()
 
       // Log parsing
-      if(outcome.logs[0]!=null){
-        
-        let parsed = json.fromString(outcome.logs[0])
-        if(parsed.kind == JSONValueKind.OBJECT){
+      if(outcome.logs !=null){
+          let splitString = outcome.logs[0].split(" ")
+          let splitString1 = outcome.logs[1].split('"')
+          let splitString2 = [""]
+          let splitString3 = [""]
 
-          let entry = parsed.toObject()
+          logs.available_balance = BigInt.fromString(splitString[9])
+          logs.accountId = splitString1[7]
+          logs.amount = BigInt.fromString(splitString1[11])
 
-          //EVENT_JSON
-          let eventJSON = entry.entries[0].value.toObject()
-
-          //standard, version, event (these stay the same for a NEP 171 emmitted log)
-          for(let i = 0; i < eventJSON.entries.length; i++){
-            let key = eventJSON.entries[i].key.toString()
-            switch (true) {
-              case key == 'standard':
-                logs.standard = eventJSON.entries[i].value.toString()
-                break
-              case key == 'event':
-                logs.event = eventJSON.entries[i].value.toString()
-                break
-              case key == 'version':
-                logs.version = eventJSON.entries[i].value.toString()
-                break
-            }
+          if(outcome.logs.length > 2){
+            splitString2 = outcome.logs[2].split(" ")
+            logs.nslp_account_stake_shares = BigInt.fromString(splitString2[4])
           }
 
-          //data
-          let data = eventJSON.entries[0].value.toObject()
-          for(let i = 0; i < data.entries.length; i++){
-            let key = data.entries[i].key.toString()
-            // Replace each key with the key of the data your are emitting,
-            // Ensure you add the keys to the Log entity and that the types are correct
-            switch (true) {
-              case key == 'accountId':
-                logs.accountId = data.entries[i].value.toString()
-                break
-              case key == 'did':
-                logs.did = data.entries[i].value.toString()
-                break
-              case key == 'registered':
-                logs.registered = data.entries[i].value.toBigInt()
-                break
-              case key == 'owner':
-                logs.owner = data.entries[i].value.toString()
-                break
-            }
+          if(outcome.logs.length > 3){
+            splitString3 = outcome.logs[3].split(" ")
+            logs.nslp_clearing_shares  = BigInt.fromString(splitString3[2])
+            logs.nslp_clearing_value = BigInt.fromString(splitString3[2])
           }
-
+          else{
+            logs.nslp_clearing_shares = BigInt.fromI32(0)
+            logs.nslp_clearing_value = BigInt.fromI32(0)
+          }
         }
+    
         logs.save()
-      }
       
   } else {
     log.info("Not processed - FunctionCall is: {}", [functionCall.methodName]);
   }
-}
+  // change the methodName here to the methodName emitting the log in the contract
+  if (functionCall.methodName == "liquid_unstake") {
+    const receiptId = receipt.id.toBase58()
+
+      // Maps the JSON formatted log to the LOG entity
+      let logs = new LiquidUnstake(`${receiptId}`)
+
+      // Standard receipt properties - likely do not need to change
+      logs.blockTime = BigInt.fromU64(blockHeader.timestampNanosec/1000000)
+      logs.blockHeight = BigInt.fromU64(blockHeader.height)
+      logs.blockHash = blockHeader.hash.toBase58()
+      logs.predecessorId = receipt.predecessorId
+      logs.receiverId = receipt.receiverId
+      logs.signerId = receipt.signerId
+      logs.signerPublicKey = publicKey.bytes.toBase58()
+      logs.gasBurned = BigInt.fromU64(outcome.gasBurnt)
+      logs.tokensBurned = outcome.tokensBurnt
+      logs.outcomeId = outcome.id.toBase58()
+      logs.executorId = outcome.executorId
+      logs.outcomeBlockHash = outcome.blockHash.toBase58()
+
+      // Log parsing
+      if(outcome.logs !=null){
+          
+          let splitString = outcome.logs[0].split(":").join(" ").split(",").join(" ").split(" ")
+          let splitString1 = outcome.logs[1].split("=").join(" ").split(" ")
+          let splitString2 = outcome.logs[2].split(":").join(" ").split(" ")
+          let splitString3 = outcome.logs[3].split(" ")
+          let splitString4 = outcome.logs[4].split(" ")
+          let splitString5 = outcome.logs[5].split('"')
+          
+          
+          logs.st_near_owned = BigInt.fromString(splitString[2])
+          logs.to_sell = BigInt.fromString(splitString[5])
+          logs.available_near = BigInt.fromString(splitString1[2])
+          logs.max_near_to_pay = BigInt.fromString(splitString1[5])
+          logs.treasury_st_near_cut = BigInt.fromString(splitString2[1])
+          logs.operator_st_near_cut = BigInt.fromString(splitString2[3])
+          logs.developers_st_near_cut = BigInt.fromString(splitString2[5])
+          logs.fee_in_st_near = BigInt.fromString(splitString2[7])
+          logs.nslp_add_st_near = BigInt.fromString(splitString3[1])
+          logs.st_liquid_unstaked = BigInt.fromString(splitString4[2]) 
+          logs.near_got = BigInt.fromString(splitString4[5])
+          logs.meta_got = BigInt.fromString(splitString4[8]) 
+          logs.accountId = splitString5[7]
+     
+        logs.save()
+      
+  } else {
+    log.info("Not processed - FunctionCall is: {}", [functionCall.methodName]);
+  }}
+   // change the methodName here to the methodName emitting the log in the contract
+   if (functionCall.methodName == "unstake") {
+    const receiptId = receipt.id.toBase58()
+
+      // Maps the JSON formatted log to the LOG entity
+      let logs = new Unstake(`${receiptId}`)
+
+      // Standard receipt properties - likely do not need to change
+      logs.blockTime = BigInt.fromU64(blockHeader.timestampNanosec/1000000)
+      logs.blockHeight = BigInt.fromU64(blockHeader.height)
+      logs.blockHash = blockHeader.hash.toBase58()
+      logs.predecessorId = receipt.predecessorId
+      logs.receiverId = receipt.receiverId
+      logs.signerId = receipt.signerId
+      logs.signerPublicKey = publicKey.bytes.toBase58()
+      logs.gasBurned = BigInt.fromU64(outcome.gasBurnt)
+      logs.tokensBurned = outcome.tokensBurnt
+      logs.outcomeId = outcome.id.toBase58()
+      logs.executorId = outcome.executorId
+      logs.outcomeBlockHash = outcome.blockHash.toBase58()
+
+      // Log parsing
+      if(outcome.logs !=null){
+        let splitString = outcome.logs[0].split('"')
+        let splitString1 = outcome.logs[1].split(":").join(" ").split(" ")
+
+        logs.accountId = splitString[7]
+        logs.amount = BigInt.fromString(splitString[11])
+        logs.shares = BigInt.fromString(splitString[15])
+        logs.total_unstaked = BigInt.fromString(splitString1[5])
+        logs.st_near = BigInt.fromString(splitString1[8])
+        logs.epoch = BigInt.fromString(splitString1[11])
+     
+        logs.save()
+      
+  } else {
+    log.info("Not processed - FunctionCall is: {}", [functionCall.methodName]);
+  }
+}}

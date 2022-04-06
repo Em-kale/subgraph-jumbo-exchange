@@ -1,6 +1,6 @@
 specVersion: 0.0.4
-description: DID registry
-repository: https://github.com/VitalPointAI/near-subgraph-template.git
+description: Meta-Pool
+repository: https://github.com/Em-kale/subgraph-metapool
 schema:
   file: schema.graphql
 dataSources:
@@ -8,14 +8,13 @@ dataSources:
     name: receipts
     network: near-mainnet
     source:
-      account: did.near
-      startBlock: 54167320
+      account: meta-pool.near
+      startBlock: 61300636
     mapping:
       apiVersion: 0.0.5
       language: wasm/assemblyscript
       file: receipts/receipts.wasm
       entities:
-        - Account
-        - Log
+        - DespositAndStake
       receiptHandlers:
         - handler: handleReceipt

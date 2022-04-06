@@ -51,6 +51,7 @@ type LiquidUnstake @entity{
   near_got: BigInt
   meta_got: BigInt  
 }
+
 type Unstake @entity{
   id: ID!
   blockTime: BigInt
@@ -73,4 +74,167 @@ type Unstake @entity{
   total_unstaked: BigInt 
   st_near: BigInt 
   epoch: BigInt 
+}
+
+type OnRetrieveFromStakingPool @entity{
+   id: ID!
+  blockTime: BigInt
+  blockHeight: BigInt
+  blockHash: String
+  predecessorId: String
+  receiverId: String
+  signerId: String
+  signerPublicKey: String
+  gasBurned: BigInt
+  tokensBurned: BigInt
+  outcomeId: String
+  executorId: String
+  outcomeBlockHash: String
+  log: String
+  # above here are standard field properties, add custom ones below
+  staking_pool: String 
+  amount: BigInt 
+}
+
+type WithdrawUnstaked @entity{
+   id: ID!
+  blockTime: BigInt
+  blockHeight: BigInt
+  blockHash: String
+  predecessorId: String
+  receiverId: String
+  signerId: String
+  signerPublicKey: String
+  gasBurned: BigInt
+  tokensBurned: BigInt
+  outcomeId: String
+  executorId: String
+  outcomeBlockHash: String
+  log: String
+  # above here are standard field properties, add custom ones below
+  account_id: String 
+  amount: BigInt 
+}
+
+type OnGetSPTotalBalance @entity{
+  id: ID!
+  blockTime: BigInt
+  blockHeight: BigInt
+  blockHash: String
+  predecessorId: String
+  receiverId: String
+  signerId: String
+  signerPublicKey: String
+  gasBurned: BigInt
+  tokensBurned: BigInt
+  outcomeId: String
+  executorId: String
+  outcomeBlockHash: String
+  log: String
+  # above here are standard field properties, add custom ones below
+  staking_pool: String 
+  old_balance: BigInt 
+  new_balance: BigInt 
+  rewards: BigInt 
+}
+type NSLPAddLiquidity @entity{ 
+  id: ID!
+  blockTime: BigInt 
+  blockHeight: BigInt 
+  blockHash: String 
+  predecessorId: String 
+  receiverId: String 
+  signerId: String 
+  signerPublicKey: String 
+  gasBurned: BigInt 
+  tokensBurned: BigInt 
+  outcomeId: String 
+  executorId: String 
+  outcomeBlockHash: String 
+  log: String 
+  # above here are standard field properties, add custom ones below 
+  account_id: String 
+  deposit_amount: BigInt 
+  available_balance: BigInt 
+}
+type OnGetSPUnstakedBalance @entity{
+  id: ID!
+  blockTime: BigInt 
+  blockHeight: BigInt 
+  blockHash: String 
+  predecessorId: String 
+  receiverId: String 
+  signerId: String 
+  signerPublicKey: String 
+  gasBurned: BigInt 
+  tokensBurned: BigInt 
+  outcomeId: String 
+  executorId: String 
+  outcomeBlockHash: String 
+  log: String 
+  # above here are standard field properties, add custom ones below 
+  inx: BigInt 
+  staking_pool: String 
+  old_unstaked_balance: BigInt 
+  new_unstaked_balance: BigInt 
+}
+
+type EndOfEpochClearing @entity{
+  id: ID!
+  blockTime: BigInt 
+  blockHeight: BigInt 
+  blockHash: String 
+  predecessorId: String 
+  receiverId: String 
+  signerId: String 
+  signerPublicKey: String 
+  gasBurned: BigInt 
+  tokensBurned: BigInt 
+  outcomeId: String 
+  executorId: String 
+  outcomeBlockHash: String 
+  log: String 
+  # above here are standard field properties, add custom ones below 
+  keep: BigInt 
+}
+type NSLPRemoveLiquidity @entity{
+  id: ID!
+  blockTime: BigInt 
+  blockHeight: BigInt 
+  blockHash: String 
+  predecessorId: String 
+  receiverId: String 
+  signerId: String 
+  signerPublicKey: String 
+  gasBurned: BigInt 
+  tokensBurned: BigInt 
+  outcomeId: String 
+  executorId: String 
+  outcomeBlockHash: String 
+  log: String 
+  # above here are standard field properties, add custom ones below 
+  account_id: String
+  near: BigInt 
+  st_near: BigInt 
+}
+type DistributeStaking @entity{
+   id: ID!
+  blockTime: BigInt 
+  blockHeight: BigInt 
+  blockHash: String 
+  predecessorId: String 
+  receiverId: String 
+  signerId: String 
+  signerPublicKey: String 
+  gasBurned: BigInt 
+  tokensBurned: BigInt 
+  outcomeId: String 
+  executorId: String 
+  outcomeBlockHash: String 
+  log: String 
+  # above here are standard field properties, add custom ones below 
+  nslp_clearing_shares: BigInt
+  nslp_clearing_amount: BigInt
+  total_amount_to_stake: BigInt 
+  sp_inx: BigInt
 }

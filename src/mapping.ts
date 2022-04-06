@@ -1,5 +1,7 @@
 import { near, log, BigInt, json, JSONValueKind } from "@graphprotocol/graph-ts"
-import { DepositAndStake, LiquidUnstake, Unstake } from "../generated/schema" // ensure to add any entities you define in schema.graphql
+import { DepositAndStake, LiquidUnstake, NSLPAddLiquidity,  Unstake, OnRetrieveFromStakingPool, 
+  WithdrawUnstaked, OnGetSPTotalBalance, OnGetSPUnstakedBalance, EndOfEpochClearing, NSLPRemoveLiquidity,
+  DistributeStaking} from "../generated/schema" // ensure to add any entities you define in schema.graphql
 
 export function handleReceipt(receipt: near.ReceiptWithOutcome): void {
   const actions = receipt.receipt.actions;
@@ -171,5 +173,266 @@ function handleAction(
       
   } else {
     log.info("Not processed - FunctionCall is: {}", [functionCall.methodName]);
-  }
-}}
+  }}
+   // change the methodName here to the methodName emitting the log in the contract
+  if (functionCall.methodName == "on_retrieve_from_staking_pool") {
+    const receiptId = receipt.id.toBase58()
+
+      // Maps the JSON formatted log to the LOG entity
+      let logs = new OnRetrieveFromStakingPool(`${receiptId}`)
+
+      // Standard receipt properties - likely do not need to change
+      logs.blockTime = BigInt.fromU64(blockHeader.timestampNanosec/1000000)
+      logs.blockHeight = BigInt.fromU64(blockHeader.height)
+      logs.blockHash = blockHeader.hash.toBase58()
+      logs.predecessorId = receipt.predecessorId
+      logs.receiverId = receipt.receiverId
+      logs.signerId = receipt.signerId
+      logs.signerPublicKey = publicKey.bytes.toBase58()
+      logs.gasBurned = BigInt.fromU64(outcome.gasBurnt)
+      logs.tokensBurned = outcome.tokensBurnt
+      logs.outcomeId = outcome.id.toBase58()
+      logs.executorId = outcome.executorId
+      logs.outcomeBlockHash = outcome.blockHash.toBase58()
+
+      // Log parsing
+      if(outcome.logs !=null){
+        let splitString = outcome.logs[0].split('"')
+
+        logs.staking_pool = splitString[7]
+        logs.amount = BigInt.fromString(splitString[11])
+        logs.save()
+  } else {
+    log.info("Not processed - FunctionCall is: {}", [functionCall.methodName]);
+  }}
+  if (functionCall.methodName == "withdraw_unstaked") {
+    const receiptId = receipt.id.toBase58()
+
+      // Maps the JSON formatted log to the LOG entity
+      let logs = new WithdrawUnstaked(`${receiptId}`)
+
+      // Standard receipt properties - likely do not need to change
+      logs.blockTime = BigInt.fromU64(blockHeader.timestampNanosec/1000000)
+      logs.blockHeight = BigInt.fromU64(blockHeader.height)
+      logs.blockHash = blockHeader.hash.toBase58()
+      logs.predecessorId = receipt.predecessorId
+      logs.receiverId = receipt.receiverId
+      logs.signerId = receipt.signerId
+      logs.signerPublicKey = publicKey.bytes.toBase58()
+      logs.gasBurned = BigInt.fromU64(outcome.gasBurnt)
+      logs.tokensBurned = outcome.tokensBurnt
+      logs.outcomeId = outcome.id.toBase58()
+      logs.executorId = outcome.executorId
+      logs.outcomeBlockHash = outcome.blockHash.toBase58()
+
+      // Log parsing
+      if(outcome.logs !=null){
+        let splitString = outcome.logs[0].split('"')
+
+        logs.account_id = splitString[7]
+        logs.amount = BigInt.fromString(splitString[11])
+        logs.save()
+  } else {
+    log.info("Not processed - FunctionCall is: {}", [functionCall.methodName]);
+  }}
+  if (functionCall.methodName == "on_get_sp_total_balance") {
+    const receiptId = receipt.id.toBase58()
+
+      // Maps the JSON formatted log to the LOG entity
+      let logs = new OnGetSPTotalBalance(`${receiptId}`)
+
+      // Standard receipt properties - likely do not need to change
+      logs.blockTime = BigInt.fromU64(blockHeader.timestampNanosec/1000000)
+      logs.blockHeight = BigInt.fromU64(blockHeader.height)
+      logs.blockHash = blockHeader.hash.toBase58()
+      logs.predecessorId = receipt.predecessorId
+      logs.receiverId = receipt.receiverId
+      logs.signerId = receipt.signerId
+      logs.signerPublicKey = publicKey.bytes.toBase58()
+      logs.gasBurned = BigInt.fromU64(outcome.gasBurnt)
+      logs.tokensBurned = outcome.tokensBurnt
+      logs.outcomeId = outcome.id.toBase58()
+      logs.executorId = outcome.executorId
+      logs.outcomeBlockHash = outcome.blockHash.toBase58()
+
+      // Log parsing
+      if(outcome.logs !=null){
+        let splitString = outcome.logs[0].split(':').join(" ").split(" ")
+      
+        logs.staking_pool = splitString[1]
+        logs.old_balance = BigInt.fromString(splitString[3])
+        logs.new_balance = BigInt.fromString(splitString[5])
+        logs.rewards = BigInt.fromString(splitString[7])
+
+        logs.save()
+  } else {
+    log.info("Not processed - FunctionCall is: {}", [functionCall.methodName]);
+  }}
+  if (functionCall.methodName == "nslp_add_liquidity") {
+    const receiptId = receipt.id.toBase58()
+
+      // Maps the JSON formatted log to the LOG entity
+      let logs = new NSLPAddLiquidity(`${receiptId}`)
+
+      // Standard receipt properties - likely do not need to change
+      logs.blockTime = BigInt.fromU64(blockHeader.timestampNanosec/1000000)
+      logs.blockHeight = BigInt.fromU64(blockHeader.height)
+      logs.blockHash = blockHeader.hash.toBase58()
+      logs.predecessorId = receipt.predecessorId
+      logs.receiverId = receipt.receiverId
+      logs.signerId = receipt.signerId
+      logs.signerPublicKey = publicKey.bytes.toBase58()
+      logs.gasBurned = BigInt.fromU64(outcome.gasBurnt)
+      logs.tokensBurned = outcome.tokensBurnt
+      logs.outcomeId = outcome.id.toBase58()
+      logs.executorId = outcome.executorId
+      logs.outcomeBlockHash = outcome.blockHash.toBase58()
+
+      // Log parsing
+      if(outcome.logs !=null){
+        let splitString = outcome.logs[0].split(" ")
+        let splitString1 = outcome.logs[1].split('"')
+
+        logs.account_id = splitString1[7]
+        logs.deposit_amount = BigInt.fromString(splitString[0])
+        logs.available_balance = BigInt.fromString(splitString[9])
+        logs.save()
+  } else {
+    log.info("Not processed - FunctionCall is: {}", [functionCall.methodName]);
+  }}
+  if (functionCall.methodName == "on_get_sp_unstaked_balance") {
+    const receiptId = receipt.id.toBase58()
+
+      // Maps the JSON formatted log to the LOG entity
+      let logs = new OnGetSPUnstakedBalance(`${receiptId}`)
+
+      // Standard receipt properties - likely do not need to change
+      logs.blockTime = BigInt.fromU64(blockHeader.timestampNanosec/1000000)
+      logs.blockHeight = BigInt.fromU64(blockHeader.height)
+      logs.blockHash = blockHeader.hash.toBase58()
+      logs.predecessorId = receipt.predecessorId
+      logs.receiverId = receipt.receiverId
+      logs.signerId = receipt.signerId
+      logs.signerPublicKey = publicKey.bytes.toBase58()
+      logs.gasBurned = BigInt.fromU64(outcome.gasBurnt)
+      logs.tokensBurned = outcome.tokensBurnt
+      logs.outcomeId = outcome.id.toBase58()
+      logs.executorId = outcome.executorId
+      logs.outcomeBlockHash = outcome.blockHash.toBase58()
+
+      // Log parsing
+      if(outcome.logs !=null){
+        let splitString = outcome.logs[0].split(":").join(" ").split(" ")
+        logs.inx = BigInt.fromString(splitString[1]) 
+        logs.staking_pool = splitString[3]
+        logs.old_unstaked_balance = BigInt.fromString(splitString[5])
+        logs.new_unstaked_balance = BigInt.fromString(splitString[7])
+        
+        logs.save()
+  } else {
+    log.info("Not processed - FunctionCall is: {}", [functionCall.methodName]);
+  }}
+  if (functionCall.methodName == "end_of_epoch_clearing") {
+    const receiptId = receipt.id.toBase58()
+
+      // Maps the JSON formatted log to the LOG entity
+      let logs = new EndOfEpochClearing(`${receiptId}`)
+
+      // Standard receipt properties - likely do not need to change
+      logs.blockTime = BigInt.fromU64(blockHeader.timestampNanosec/1000000)
+      logs.blockHeight = BigInt.fromU64(blockHeader.height)
+      logs.blockHash = blockHeader.hash.toBase58()
+      logs.predecessorId = receipt.predecessorId
+      logs.receiverId = receipt.receiverId
+      logs.signerId = receipt.signerId
+      logs.signerPublicKey = publicKey.bytes.toBase58()
+      logs.gasBurned = BigInt.fromU64(outcome.gasBurnt)
+      logs.tokensBurned = outcome.tokensBurnt
+      logs.outcomeId = outcome.id.toBase58()
+      logs.executorId = outcome.executorId
+      logs.outcomeBlockHash = outcome.blockHash.toBase58()
+
+      // Log parsing
+      if(outcome.logs != null && outcome.logs.length == 1 ){
+        let splitString = outcome.logs[0].split('"')
+        logs.keep = BigInt.fromString(splitString[7]) 
+        logs.save()
+  } else {
+    log.info("Not processed - FunctionCall is: {}", [functionCall.methodName]);
+  }}
+  if (functionCall.methodName == "nslp_remove_liquidity") {
+    const receiptId = receipt.id.toBase58()
+
+      // Maps the JSON formatted log to the LOG entity
+      let logs = new NSLPRemoveLiquidity(`${receiptId}`)
+
+      // Standard receipt properties - likely do not need to change
+      logs.blockTime = BigInt.fromU64(blockHeader.timestampNanosec/1000000)
+      logs.blockHeight = BigInt.fromU64(blockHeader.height)
+      logs.blockHash = blockHeader.hash.toBase58()
+      logs.predecessorId = receipt.predecessorId
+      logs.receiverId = receipt.receiverId
+      logs.signerId = receipt.signerId
+      logs.signerPublicKey = publicKey.bytes.toBase58()
+      logs.gasBurned = BigInt.fromU64(outcome.gasBurnt)
+      logs.tokensBurned = outcome.tokensBurnt
+      logs.outcomeId = outcome.id.toBase58()
+      logs.executorId = outcome.executorId
+      logs.outcomeBlockHash = outcome.blockHash.toBase58()
+
+      // Log parsing
+      if(outcome.logs != null && outcome.logs.length == 1 ){
+        let splitString = outcome.logs[0].split('"')
+
+        logs.account_id = splitString[7]
+        logs.near = BigInt.fromString(splitString[11])
+        logs.st_near = BigInt.fromString(splitString[15])
+
+        logs.save()
+  } else {
+    log.info("Not processed - FunctionCall is: {}", [functionCall.methodName]);
+  }}
+  if (functionCall.methodName == "distribute_staking") {
+    const receiptId = receipt.id.toBase58()
+
+      // Maps the JSON formatted log to the LOG entity
+      let logs = new DistributeStaking(`${receiptId}`)
+
+      // Standard receipt properties - likely do not need to change
+      logs.blockTime = BigInt.fromU64(blockHeader.timestampNanosec/1000000)
+      logs.blockHeight = BigInt.fromU64(blockHeader.height)
+      logs.blockHash = blockHeader.hash.toBase58()
+      logs.predecessorId = receipt.predecessorId
+      logs.receiverId = receipt.receiverId
+      logs.signerId = receipt.signerId
+      logs.signerPublicKey = publicKey.bytes.toBase58()
+      logs.gasBurned = BigInt.fromU64(outcome.gasBurnt)
+      logs.tokensBurned = outcome.tokensBurnt
+      logs.outcomeId = outcome.id.toBase58()
+      logs.executorId = outcome.executorId
+      logs.outcomeBlockHash = outcome.blockHash.toBase58()
+
+      // Log parsing
+      if(outcome.logs != null && outcome.logs.length > 1){
+        let splitString = outcome.logs[0].split(' ')
+    
+        if(BigInt.fromString(splitString[4]) == BigInt.fromI32(0) && outcome.logs.length == 3){
+           let splitString2 = outcome.logs[1].split(':')
+           let splitString3= outcome.logs[2].split('>').join(",").split(",")
+           logs.total_amount_to_stake = BigInt.fromString(splitString2[1])
+           logs.sp_inx = BigInt.fromString(splitString3[1])
+           logs.nslp_clearing_shares = BigInt.fromI32(0)
+           logs.save()
+        }
+        else if(BigInt.fromString(splitString[4]) != BigInt.fromI32(0) && outcome.logs.length == 3){
+          let splitString3 = outcome.logs[2].split('"')
+          logs.nslp_clearing_shares = BigInt.fromString(splitString3[7])
+          logs.nslp_clearing_amount = BigInt.fromString(splitString3[11])
+          logs.save()
+        }
+      
+       
+  } else {
+    log.info("Not processed - FunctionCall is: {}", [functionCall.methodName]);
+  }}
+}

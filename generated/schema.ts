@@ -3608,6 +3608,23 @@ export class DistributeStaking extends Entity {
     }
   }
 
+  get nslp_account_stake_shares(): BigInt | null {
+    let value = this.get("nslp_account_stake_shares");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set nslp_account_stake_shares(value: BigInt | null) {
+    if (!value) {
+      this.unset("nslp_account_stake_shares");
+    } else {
+      this.set("nslp_account_stake_shares", Value.fromBigInt(<BigInt>value));
+    }
+  }
+
   get total_amount_to_stake(): BigInt | null {
     let value = this.get("total_amount_to_stake");
     if (!value || value.kind == ValueKind.NULL) {

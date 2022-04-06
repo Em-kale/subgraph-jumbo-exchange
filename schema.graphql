@@ -235,6 +235,7 @@ type DistributeStaking @entity{
   # above here are standard field properties, add custom ones below 
   nslp_clearing_shares: BigInt
   nslp_clearing_amount: BigInt
+  nslp_account_stake_shares: BigInt
   total_amount_to_stake: BigInt 
   sp_inx: BigInt
 }

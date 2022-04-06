@@ -421,11 +421,13 @@ function handleAction(
            let splitString3= outcome.logs[2].split('>').join(",").split(",")
            logs.total_amount_to_stake = BigInt.fromString(splitString2[1])
            logs.sp_inx = BigInt.fromString(splitString3[1])
+           logs.nslp_account_stake_shares = BigInt.fromString(splitString[4])
            logs.nslp_clearing_shares = BigInt.fromI32(0)
            logs.save()
         }
         else if(BigInt.fromString(splitString[4]) != BigInt.fromI32(0) && outcome.logs.length == 3){
           let splitString3 = outcome.logs[2].split('"')
+          logs.nslp_account_stake_shares = BigInt.fromString(splitString[4])
           logs.nslp_clearing_shares = BigInt.fromString(splitString3[7])
           logs.nslp_clearing_amount = BigInt.fromString(splitString3[11])
           logs.save()

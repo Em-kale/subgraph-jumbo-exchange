@@ -239,3 +239,38 @@ type DistributeStaking @entity{
   total_amount_to_stake: BigInt 
   sp_inx: BigInt
 }
+type OnStakingPoolUnstake @entity{
+     id: ID!
+  blockTime: BigInt 
+  blockHeight: BigInt 
+  blockHash: String 
+  predecessorId: String 
+  receiverId: String 
+  signerId: String 
+  signerPublicKey: String 
+  gasBurned: BigInt 
+  tokensBurned: BigInt 
+  outcomeId: String 
+  executorId: String 
+  outcomeBlockHash: String 
+  log: String 
+  staking_pool: String
+  amount: BigInt 
+}
+type DistributeRewards @entity{
+     id: ID!
+  blockTime: BigInt 
+  blockHeight: BigInt 
+  blockHash: String 
+  predecessorId: String 
+  receiverId: String 
+  signerId: String 
+  signerPublicKey: String 
+  gasBurned: BigInt 
+  tokensBurned: BigInt 
+  outcomeId: String 
+  executorId: String 
+  outcomeBlockHash: String 
+  log: String 
+  staking_pool: String
+}

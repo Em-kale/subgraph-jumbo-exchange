@@ -1,7 +1,7 @@
 import { near, log, BigInt, json, JSONValueKind } from "@graphprotocol/graph-ts"
 import { DepositAndStake, LiquidUnstake, NSLPAddLiquidity,  Unstake, OnRetrieveFromStakingPool, 
   WithdrawUnstaked, OnGetSPTotalBalance, OnGetSPUnstakedBalance, EndOfEpochClearing, NSLPRemoveLiquidity,
-  DistributeStaking} from "../generated/schema" // ensure to add any entities you define in schema.graphql
+  DistributeStaking, OnStakingPoolUnstake, DistributeRewards} from "../generated/schema" // ensure to add any entities you define in schema.graphql
 
 export function handleReceipt(receipt: near.ReceiptWithOutcome): void {
   const actions = receipt.receipt.actions;
@@ -434,6 +434,67 @@ function handleAction(
         }
       
        
+  } else {
+    log.info("Not processed - FunctionCall is: {}", [functionCall.methodName]);
+  }}
+  if (functionCall.methodName == "on_staking_pool_unstake") {
+    const receiptId = receipt.id.toBase58()
+
+      // Maps the JSON formatted log to the LOG entity
+      let logs = new OnStakingPoolUnstake(`${receiptId}`)
+
+      // Standard receipt properties - likely do not need to change
+      logs.blockTime = BigInt.fromU64(blockHeader.timestampNanosec/1000000)
+      logs.blockHeight = BigInt.fromU64(blockHeader.height)
+      logs.blockHash = blockHeader.hash.toBase58()
+      logs.predecessorId = receipt.predecessorId
+      logs.receiverId = receipt.receiverId
+      logs.signerId = receipt.signerId
+      logs.signerPublicKey = publicKey.bytes.toBase58()
+      logs.gasBurned = BigInt.fromU64(outcome.gasBurnt)
+      logs.tokensBurned = outcome.tokensBurnt
+      logs.outcomeId = outcome.id.toBase58()
+      logs.executorId = outcome.executorId
+      logs.outcomeBlockHash = outcome.blockHash.toBase58()
+
+      // Log parsing
+      if(outcome.logs != null && outcome.logs.length == 1 ){
+        let splitString = outcome.logs[0].split('"')
+
+        logs.staking_pool = splitString[7]
+        logs.amount = BigInt.fromString(splitString[11])
+
+        logs.save()
+  } else {
+    log.info("Not processed - FunctionCall is: {}", [functionCall.methodName]);
+  }}
+  if (functionCall.methodName == "distribute_rewards") {
+    const receiptId = receipt.id.toBase58()
+
+      // Maps the JSON formatted log to the LOG entity
+      let logs = new DistributeRewards(`${receiptId}`)
+
+      // Standard receipt properties - likely do not need to change
+      logs.blockTime = BigInt.fromU64(blockHeader.timestampNanosec/1000000)
+      logs.blockHeight = BigInt.fromU64(blockHeader.height)
+      logs.blockHash = blockHeader.hash.toBase58()
+      logs.predecessorId = receipt.predecessorId
+      logs.receiverId = receipt.receiverId
+      logs.signerId = receipt.signerId
+      logs.signerPublicKey = publicKey.bytes.toBase58()
+      logs.gasBurned = BigInt.fromU64(outcome.gasBurnt)
+      logs.tokensBurned = outcome.tokensBurnt
+      logs.outcomeId = outcome.id.toBase58()
+      logs.executorId = outcome.executorId
+      logs.outcomeBlockHash = outcome.blockHash.toBase58()
+
+      // Log parsing
+      if(outcome.logs != null && outcome.logs.length == 1 ){
+        let splitString = outcome.logs[0].split('@')
+
+        logs.staking_pool = splitString[1]
+
+        logs.save()
   } else {
     log.info("Not processed - FunctionCall is: {}", [functionCall.methodName]);
   }}
